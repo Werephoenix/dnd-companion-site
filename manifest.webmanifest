@@ -1,0 +1,15 @@
+{
+  "name": "Companion — a 5E player's right hand",
+  "short_name": "Companion",
+  "description": "A beginner-first companion for 5E tabletop play — character, dice, battles, story, and party magic. Works offline.",
+  "start_url": "/dnd-companion-site/",
+  "scope": "/dnd-companion-site/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#15111a",
+  "theme_color": "#15111a",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}

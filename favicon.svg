@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#11161f"/>
+      <stop offset="1" stop-color="#07090f"/>
+    </linearGradient>
+    <linearGradient id="silver" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#eaf4ff"/>
+      <stop offset="0.5" stop-color="#b0c4d8"/>
+      <stop offset="1" stop-color="#6a7a8a"/>
+    </linearGradient>
+  </defs>
+  <rect x="1" y="1" width="30" height="30" rx="7" fill="url(#bg)" stroke="#283848" stroke-width="1"/>
+  <!-- Arcane sparkle: a four-point star -->
+  <path d="M16 4 C 17.2 12.6, 19.4 14.8, 28 16 C 19.4 17.2, 17.2 19.4, 16 28 C 14.8 19.4, 12.6 17.2, 4 16 C 12.6 14.8, 14.8 12.6, 16 4 Z"
+        fill="url(#silver)"/>
+  <!-- Small gold accent spark -->
+  <circle cx="23.5" cy="9" r="1.5" fill="#c4a444"/>
+</svg>
