@@ -1,0 +1,12 @@
+© 2026 Werephoenix. All rights reserved.
+
+This is a private beta build shared for playtesting only. The app, its
+original adventures, text, artwork direction, and code are the property
+of their creator and are not licensed for copying, redistribution, or
+commercial use.
+
+Portions of game content derive from the System Reference Document 5.2.1
+by Wizards of the Coast LLC, used under the Creative Commons Attribution
+4.0 International License (CC-BY-4.0). This project is an independent
+work, compatible with fifth-edition play, and is not affiliated with or
+endorsed by Wizards of the Coast.
