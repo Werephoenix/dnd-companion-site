@@ -1,0 +1,127 @@
+<!doctype html>
+<!-- WereWick: how much can this device keep? (2026-10-12)
+     A one-off check for the lane. The Inspector found that a full save could be near a phone's limit, and that an
+     iPhone may count storage differently from a computer. This page finds the real limit on the device that opens it.
+     WHAT IT DOES: writes plain filler under its own keys (ww_quota_test_*) until the browser refuses, counts what
+     fitted, then DELETES every one of those keys. It never reads, changes or removes the game's own data.
+     It sends nothing anywhere. To remove this page: delete this one file. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WereWick: storage check</title>
+<style>
+  :root { color-scheme: dark; }
+  body { margin:0; padding:24px 18px 60px; background:#110d18; color:#efe9f7; font:17px/1.5 -apple-system, system-ui, "Segoe UI", sans-serif; }
+  main { max-width:520px; margin:0 auto; }
+  h1 { font-size:1.35rem; margin:0 0 .4rem; color:#ffd58a; }
+  p { margin:.6rem 0; } .dim { color:#b9aecb; font-size:.92rem; }
+  button { font:inherit; font-weight:700; min-height:52px; width:100%; margin-top:1rem; border-radius:12px; border:2px solid #ffc457; background:#2a1f38; color:#fff; }
+  button:disabled { opacity:.5; }
+  #out { margin-top:1.2rem; padding:14px; border-radius:12px; border:1px solid #5b4b73; background:#1b1426; white-space:pre-wrap; font:15px/1.6 ui-monospace, Menlo, monospace; display:none; }
+  .ok { color:#9fe0a3; } .warn { color:#ffb3ac; }
+</style>
+</head>
+<body>
+<main>
+  <h1>How much can this device keep?</h1>
+  <p>This is a one-off check for WereWick. It finds out how much your browser lets the game save on this device.</p>
+  <p class="dim"><b>Before you tap:</b> close the game if it is open in another tab. The check takes about ten seconds, removes everything it wrote, and sends nothing anywhere. It does not touch your heroes or your saves.</p>
+  <button id="go" type="button">Run the check</button>
+  <div id="out"></div>
+  <button id="copy" type="button" style="display:none">Copy the result</button>
+  <h1 style="margin-top:2rem">And the picture store?</h1>
+  <p>Pictures you add yourself are kept in a second, roomier store. This checks how much it will take on this device.</p>
+  <p class="dim">It writes up to 40 MB of blank test data into a store of its own, then deletes that store. It never touches the game's pictures and sends nothing anywhere. About fifteen seconds.</p>
+  <button id="go2" type="button">Check the picture store</button>
+  <div id="out2"></div>
+  <button id="copy2" type="button" style="display:none">Copy the result</button>
+</main>
+<script>
+(function () {
+  var out = document.getElementById("out"), go = document.getElementById("go"), copy = document.getElementById("copy"), PRE = "ww_quota_test_";
+  function sizes() {
+    var all = 0, game = 0, keys = 0;
+    for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i), n = (localStorage.getItem(k) || "").length + k.length; all += n; if (k.indexOf("companion_") === 0) { game += n; keys++; } }
+    return { all: all, game: game, keys: keys };
+  }
+  function clean() { var gone = []; for (var i = localStorage.length - 1; i >= 0; i--) { var k = localStorage.key(i); if (k && k.indexOf(PRE) === 0) gone.push(k); } gone.forEach(function (k) { localStorage.removeItem(k); }); return gone.length; }
+  function kb(n) { return Math.round(n / 1024).toLocaleString() + " KB"; }
+  go.onclick = function () {
+    go.disabled = true; out.style.display = "block"; out.textContent = "Checking…";
+    setTimeout(function () {
+      var text = "", ok = true;
+      try {
+        clean();
+        var before = sizes(), wrote = 0, n = 0;
+        var steps = [262144, 32768, 4096, 512];             // fill in big pieces, then finer ones
+        try {
+          for (var s = 0; s < steps.length; s++) {
+            var piece = new Array(steps[s] + 1).join("x");
+            for (;;) { try { localStorage.setItem(PRE + (n++), piece); wrote += steps[s]; } catch (e) { break; } if (wrote > 60 * 1024 * 1024) break; }
+          }
+        } finally { clean(); }
+        var after = sizes(), limit = before.all + wrote, left = clean();
+        var full = limit ? Math.round(before.game / limit * 100) : 0;
+        text += "WereWick storage check\n";
+        text += "When: " + new Date().toString().slice(0, 24) + "\n";
+        text += "Browser: " + navigator.userAgent.slice(0, 110) + "\n\n";
+        text += "This device lets the game keep about: " + kb(limit) + "\n";
+        text += "The game is using now:               " + kb(before.game) + " in " + before.keys + " stores\n";
+        text += "So the game is about " + full + "% full.\n\n";
+        text += "(counted in characters: " + limit.toLocaleString() + " in all)\n";
+        text += "Everything the check wrote was removed: " + (after.all === before.all && left === 0 ? "yes" : "NO, please tell Claude") + "\n";
+        ok = after.all === before.all;
+      } catch (e) { text = "The check could not run on this device: " + (e && e.message ? e.message : e) + "\nNothing was changed."; ok = false; try { clean(); } catch (x) {} }
+      out.textContent = text; out.className = ok ? "ok" : "warn"; go.disabled = false; go.textContent = "Run it again"; copy.style.display = "block";
+      copy.onclick = function () { if (navigator.clipboard) navigator.clipboard.writeText(text).then(function () { copy.textContent = "Copied. Paste it to Claude."; }, function () { copy.textContent = "Could not copy: please read it out instead"; }); };
+    }, 60);
+  };
+})();
+</script>
+<script>
+(function () {
+  var go = document.getElementById("go2"), out = document.getElementById("out2"), copy = document.getElementById("copy2");
+  var NAME = "ww_quota_test_db", PIECE = 2 * 1024 * 1024, MAX = 20;
+  function mb(n) { return (Math.round(n / 1048576 * 10) / 10).toLocaleString() + " MB"; }
+  function drop() { return new Promise(function (done) { try { var r = indexedDB.deleteDatabase(NAME); r.onsuccess = r.onerror = r.onblocked = function () { done(); }; } catch (e) { done(); } }); }
+  function show(text, ok) { out.style.display = "block"; out.textContent = text; out.className = ok ? "ok" : "warn"; go.disabled = false; go.textContent = "Run it again"; copy.style.display = "block";
+    copy.onclick = function () { if (navigator.clipboard) navigator.clipboard.writeText(text).then(function () { copy.textContent = "Copied. Paste it to Claude."; }, function () { copy.textContent = "Could not copy: please read it out instead"; }); }; }
+  go.onclick = function () {
+    go.disabled = true; out.style.display = "block"; out.className = ""; out.textContent = "Checking…";
+    if (typeof indexedDB === "undefined") { show("WereWick picture store check\nThis browser has no picture store (IndexedDB). Your own pictures cannot be kept here.\nNothing was changed.", false); return; }
+    var head = "WereWick picture store check\nWhen: " + new Date().toString().slice(0, 24) + "\nBrowser: " + navigator.userAgent.slice(0, 110) + "\n\n";
+    drop().then(function () {
+      var req = indexedDB.open(NAME, 1);
+      req.onupgradeneeded = function () { req.result.createObjectStore("t"); };
+      req.onerror = req.onblocked = function () { show(head + "The picture store would not open on this device (a private window can do this).\nNothing was changed.", false); };
+      req.onsuccess = function () {
+        var db = req.result, n = 0;
+        function finish(why) {
+          db.close();
+          var est = navigator.storage && navigator.storage.estimate ? navigator.storage.estimate() : Promise.resolve(null);
+          est.then(function (e) { return drop().then(function () { return e; }); }).then(function (e) {
+            var text = head + "It took " + mb(n * PIECE) + " of test data" + (n >= MAX ? " (the check stops at " + mb(MAX * PIECE) + "; there may be much more room)." : ", then refused: " + why + ".") + "\n";
+            text += "That is room for about " + Math.floor(n * PIECE / 150000).toLocaleString() + " pictures or more.\n";
+            if (e && e.quota) text += "The browser's own estimate: " + mb(e.quota) + " allowed, " + mb(e.usage || 0) + " in use (browsers update that second figure slowly, so it can read low).\n";
+            else text += "The browser gave no estimate of its own.\n";
+            text += "The test store was deleted afterwards.\n";
+            show(text, n > 0);
+          });
+        }
+        function next() {
+          if (n >= MAX) { finish(""); return; }
+          var tx;
+          try { tx = db.transaction("t", "readwrite"); tx.objectStore("t").put(new ArrayBuffer(PIECE), n); }
+          catch (e) { finish(e && e.name ? e.name : "an error"); return; }
+          tx.oncomplete = function () { n++; out.textContent = "Checking… " + mb(n * PIECE); next(); };
+          tx.onerror = tx.onabort = function () { finish(tx.error && tx.error.name ? tx.error.name : "no more room"); };
+        }
+        next();
+      };
+    });
+  };
+})();
+</script>
+</body>
+</html>
