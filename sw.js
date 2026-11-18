@@ -1,5 +1,5 @@
-// Companion service worker — generated at build (1795026815348). Hand-rolled, no deps.
-const CACHE = 'companion-1795026815348';
+// Companion service worker — generated at build (1795035320562). Hand-rolled, no deps.
+const CACHE = 'companion-1795035320562';
 const BASE = '/dnd-companion-site/';
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll([BASE])).then(() => self.skipWaiting()));
